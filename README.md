@@ -1,1 +1,1 @@
-Tempban-on-Git
+This is a mod that allows server admins to temporarily ban players.
