@@ -3,8 +3,8 @@ package redstonedubstep.mods.tempban;
 import java.util.Date;
 import java.util.List;
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import javax.annotation.Nullable;
+
+import org.apache.commons.lang3.time.DateUtils;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
@@ -12,26 +12,24 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
-import net.minecraft.command.CommandSource;
-import net.minecraft.command.Commands;
-import net.minecraft.command.arguments.EntitySelector;
-import net.minecraft.command.arguments.GameProfileArgument;
-import net.minecraft.command.arguments.MessageArgument;
-import net.minecraft.command.impl.BanIpCommand;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.server.management.IPBanEntry;
-import net.minecraft.server.management.IPBanList;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextComponentUtils;
-import net.minecraft.util.text.TranslationTextComponent;
-import org.apache.commons.lang3.time.DateUtils;
+
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.commands.arguments.MessageArgument;
+import net.minecraft.commands.arguments.selector.EntitySelector;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.server.commands.BanIpCommands;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.players.IpBanList;
+import net.minecraft.server.players.IpBanListEntry;
 
 public class TempbanIpCommand {
-	private static final SimpleCommandExceptionType IP_INVALID = new SimpleCommandExceptionType(new TranslationTextComponent("commands.banip.invalid"));
-	private static final SimpleCommandExceptionType FAILED_EXCEPTION = new SimpleCommandExceptionType(new TranslationTextComponent("commands.banip.failed"));
+	private static final SimpleCommandExceptionType ERROR_INVALID_IP = new SimpleCommandExceptionType(new TranslatableComponent("commands.banip.invalid"));
+	private static final SimpleCommandExceptionType FAILED_EXCEPTION = new SimpleCommandExceptionType(new TranslatableComponent("commands.banip.failed"));
 
-	public static void register(CommandDispatcher<CommandSource> dispatcher) {
-		dispatcher.register(Commands.literal("tempban-ip").requires(p -> p.hasPermissionLevel(3))
+	public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
+		dispatcher.register(Commands.literal("tempban-ip").requires(p -> p.hasPermission(3))
 				.then(Commands.argument("target", StringArgumentType.word())
 						.then(Commands.argument("months", IntegerArgumentType.integer(0))
 								.then(Commands.argument("days", IntegerArgumentType.integer(0))
@@ -41,41 +39,41 @@ public class TempbanIpCommand {
 														.executes(TempbanIpCommand::tempbanUsernameOrIp)))))));
 	}
 
-	private static int tempbanUsernameOrIp(CommandContext<CommandSource> ctx) throws CommandSyntaxException {
+	private static int tempbanUsernameOrIp(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
 		return tempbanUsernameOrIp(ctx.getSource(), StringArgumentType.getString(ctx, "target"), IntegerArgumentType.getInteger(ctx, "months"), IntegerArgumentType.getInteger(ctx, "days"), IntegerArgumentType.getInteger(ctx, "hours"), MessageArgument.getMessage(ctx, "reason"));
 	}
 
-	private static int tempbanUsernameOrIp(CommandSource source, String username, int monthDuration, int dayDuration, int hourDuration, ITextComponent reason) throws CommandSyntaxException {
-		Matcher matcher = BanIpCommand.IP_PATTERN.matcher(username);
+	private static int tempbanUsernameOrIp(CommandSourceStack source, String username, int monthDuration, int dayDuration, int hourDuration, Component reason) throws CommandSyntaxException {
+		Matcher matcher = BanIpCommands.IP_ADDRESS_PATTERN.matcher(username);
 		if (matcher.matches()) {
 			return tempbanIpAddress(source, username, monthDuration, dayDuration, hourDuration, reason);
 		} else {
-			ServerPlayerEntity serverplayerentity = source.getServer().getPlayerList().getPlayerByUsername(username);
-			if (serverplayerentity != null) {
-				return tempbanIpAddress(source, serverplayerentity.getPlayerIP(), monthDuration, dayDuration, hourDuration, reason);
+			ServerPlayer serverplayer = source.getServer().getPlayerList().getPlayerByName(username);
+			if (serverplayer != null) {
+				return tempbanIpAddress(source, serverplayer.getIpAddress(), monthDuration, dayDuration, hourDuration, reason);
 			} else {
-				throw IP_INVALID.create();
+				throw ERROR_INVALID_IP.create();
 			}
 		}
 	}
 
-	private static int tempbanIpAddress(CommandSource source, String ip, int monthDuration, int dayDuration, int hourDuration, ITextComponent reason) throws CommandSyntaxException {
-		IPBanList ipbanlist = source.getServer().getPlayerList().getBannedIPs();
+	private static int tempbanIpAddress(CommandSourceStack source, String ip, int monthDuration, int dayDuration, int hourDuration, Component reason) throws CommandSyntaxException {
+		IpBanList ipbanlist = source.getServer().getPlayerList().getIpBans();
 		Date date = DateUtils.addMonths(DateUtils.addDays(DateUtils.addHours(new Date(), hourDuration), dayDuration), monthDuration);
 
 		if (ipbanlist.isBanned(ip)) {
 			throw FAILED_EXCEPTION.create();
 		} else {
-			List<ServerPlayerEntity> list = source.getServer().getPlayerList().getPlayersMatchingAddress(ip);
-			IPBanEntry ipbanentry = new IPBanEntry(ip,null, source.getName(), date, reason == null ? null : reason.getString());
-			ipbanlist.addEntry(ipbanentry);
-			source.sendFeedback(new TranslationTextComponent("Banned %s for %s months, %s days and %s hours: %s", ip, monthDuration, dayDuration, hourDuration, ipbanentry.getBanReason()), true);
+			List<ServerPlayer> list = source.getServer().getPlayerList().getPlayersWithAddress(ip);
+			IpBanListEntry ipbanentry = new IpBanListEntry(ip,null, source.getTextName(), date, reason == null ? null : reason.getString());
+			ipbanlist.add(ipbanentry);
+			source.sendSuccess(new TranslatableComponent("Banned %s for %s months, %s days and %s hours: %s", ip, monthDuration, dayDuration, hourDuration, ipbanentry.getReason()), true);
 			if (!list.isEmpty()) {
-				source.sendFeedback(new TranslationTextComponent("commands.banip.info", list.size(), EntitySelector.joinNames(list)), true);
+				source.sendSuccess(new TranslatableComponent("commands.banip.info", list.size(), EntitySelector.joinNames(list)), true);
 			}
 
-			for(ServerPlayerEntity serverplayerentity : list) {
-				serverplayerentity.connection.disconnect(new TranslationTextComponent("multiplayer.disconnect.ip_banned"));
+			for(ServerPlayer serverplayerentity : list) {
+				serverplayerentity.connection.disconnect(new TranslatableComponent("multiplayer.disconnect.ip_banned"));
 			}
 
 			return list.size();
