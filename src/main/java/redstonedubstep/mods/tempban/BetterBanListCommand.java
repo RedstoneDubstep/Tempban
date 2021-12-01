@@ -39,8 +39,6 @@ public class BetterBanListCommand {
 			for(BanListEntry<?> entry : banListEntries) {
 				TranslatableComponent entryComponent = new TranslatableComponent("commands.banlist.entry", entry.getDisplayName(), entry.getSource(), entry.getReason());
 
-				DateUtils.formatDate()
-
 				if (entry.getExpires() != null) {
 					entryComponent.append(new TextComponent(" (" + entry.getCreated() + " - " + entry.getExpires() + ")").withStyle(ChatFormatting.GRAY));
 				}
