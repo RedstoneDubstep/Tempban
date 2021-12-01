@@ -17,8 +17,9 @@ public class Tempban {
 
 	public void registerCommands(RegisterCommandsEvent event){
 		if (event.getEnvironment() != Commands.CommandSelection.INTEGRATED) {
-		TempbanCommand.register(event.getDispatcher());
-		TempbanIpCommand.register(event.getDispatcher());
+			BetterBanListCommand.register(event.getDispatcher());
+			TempbanCommand.register(event.getDispatcher());
+			TempbanIpCommand.register(event.getDispatcher());
 		}
 	}
 }
