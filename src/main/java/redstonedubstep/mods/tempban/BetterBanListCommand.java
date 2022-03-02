@@ -2,8 +2,6 @@ package redstonedubstep.mods.tempban;
 
 import java.util.Collection;
 
-import org.apache.http.client.utils.DateUtils;
-
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.mojang.brigadier.CommandDispatcher;
