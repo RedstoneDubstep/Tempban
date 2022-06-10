@@ -18,13 +18,12 @@ import net.minecraft.commands.arguments.GameProfileArgument;
 import net.minecraft.commands.arguments.MessageArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentUtils;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.UserBanList;
 import net.minecraft.server.players.UserBanListEntry;
 
 public class TempbanCommand {
-	private static final SimpleCommandExceptionType ERROR_ALREADY_BANNED = new SimpleCommandExceptionType(new TranslatableComponent("commands.ban.failed"));
+	private static final SimpleCommandExceptionType ERROR_ALREADY_BANNED = new SimpleCommandExceptionType(Component.translatable("commands.ban.failed"));
 
 	public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
 		dispatcher.register(Commands.literal("tempban").requires((player) -> player.hasPermission(3))
@@ -42,27 +41,28 @@ public class TempbanCommand {
 	}
 
 	private static int tempbanPlayers(CommandSourceStack source, Collection<GameProfile> toBeBanned, int monthDuration, int dayDuration, int hourDuration, Component reason) throws CommandSyntaxException {
-		UserBanList banlist = source.getServer().getPlayerList().getBans();
+		UserBanList banList = source.getServer().getPlayerList().getBans();
 		int i = 0;
 		Date date = DateUtils.addMonths(DateUtils.addDays(DateUtils.addHours(new Date(), hourDuration), dayDuration), monthDuration);
 
 		for(GameProfile gameprofile : toBeBanned) {
-			if (!banlist.isBanned(gameprofile)) {
-				UserBanListEntry profilebanentry = new UserBanListEntry(gameprofile, null, source.getTextName(), date, reason == null ? null : reason.getString());
-				banlist.add(profilebanentry);
+			if (!banList.isBanned(gameprofile)) {
+				UserBanListEntry banListEntry = new UserBanListEntry(gameprofile, null, source.getTextName(), date, reason == null ? null : reason.getString());
+
+				banList.add(banListEntry);
 				++i;
-				source.sendSuccess(new TranslatableComponent("Banned %s for %s months, %s days and %s hours: %s", ComponentUtils.getDisplayName(gameprofile), monthDuration, dayDuration, hourDuration, profilebanentry.getReason()), true);
-				ServerPlayer serverplayer = source.getServer().getPlayerList().getPlayer(gameprofile.getId());
-				if (serverplayer != null) {
-					serverplayer.connection.disconnect(new TranslatableComponent("multiplayer.disconnect.banned"));
-				}
+				source.sendSuccess(Component.translatable("Banned %s for %s months, %s days and %s hours: %s", ComponentUtils.getDisplayName(gameprofile), monthDuration, dayDuration, hourDuration, banListEntry.getReason()), true);
+
+				ServerPlayer player = source.getServer().getPlayerList().getPlayer(gameprofile.getId());
+
+				if (player != null)
+					player.connection.disconnect(Component.translatable("multiplayer.disconnect.banned"));
 			}
 		}
 
-		if (i == 0) {
+		if (i == 0)
 			throw ERROR_ALREADY_BANNED.create();
-		} else {
+		else
 			return i;
-		}
 	}
 }
