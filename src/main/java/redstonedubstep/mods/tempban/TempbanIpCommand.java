@@ -2,10 +2,10 @@ package redstonedubstep.mods.tempban;
 
 import java.util.Date;
 import java.util.List;
-import java.util.regex.Matcher;
 
 import org.apache.commons.lang3.time.DateUtils;
 
+import com.google.common.net.InetAddresses;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
@@ -18,7 +18,6 @@ import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.MessageArgument;
 import net.minecraft.commands.arguments.selector.EntitySelector;
 import net.minecraft.network.chat.Component;
-import net.minecraft.server.commands.BanIpCommands;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.IpBanList;
 import net.minecraft.server.players.IpBanListEntry;
@@ -43,9 +42,7 @@ public class TempbanIpCommand {
 	}
 
 	private static int tempbanIpOrName(CommandSourceStack source, String username, int monthDuration, int dayDuration, int hourDuration, Component reason) throws CommandSyntaxException {
-		Matcher matcher = BanIpCommands.IP_ADDRESS_PATTERN.matcher(username);
-
-		if (matcher.matches())
+		if (InetAddresses.isInetAddress(username))
 			return tempbanIpAddress(source, username, monthDuration, dayDuration, hourDuration, reason);
 		else {
 			ServerPlayer player = source.getServer().getPlayerList().getPlayerByName(username);
