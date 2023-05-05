@@ -18,15 +18,18 @@ public class BetterBanListCommand {
 	public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
 		dispatcher.register(Commands.literal("banlist")
 				.requires(stack -> stack.hasPermission(3))
-				.executes(ctx -> {
-					PlayerList playerlist = ctx.getSource().getServer().getPlayerList();
-
-					return showList(ctx.getSource(), Lists.newArrayList(Iterables.concat(playerlist.getBans().getEntries(), playerlist.getIpBans().getEntries())));
-				}).then(Commands.literal("ips")
+				.executes(ctx -> showConcatList(ctx.getSource()))
+                .then(Commands.literal("ips")
 						.executes(ctx -> showList(ctx.getSource(), ctx.getSource().getServer().getPlayerList().getIpBans().getEntries())))
 				.then(Commands.literal("players")
 						.executes((ctx) -> showList(ctx.getSource(), ctx.getSource().getServer().getPlayerList().getBans().getEntries()))));
 	}
+
+    private static int showConcatList(CommandSourceStack ctx) {
+        PlayerList playerlist = ctx.getServer().getPlayerList();
+
+        return showList(ctx, Lists.newArrayList(Iterables.concat(playerlist.getBans().getEntries(), playerlist.getIpBans().getEntries())));
+    }
 
 	private static int showList(CommandSourceStack source, Collection<? extends BanListEntry<?>> banListEntries) {
 		if (banListEntries.isEmpty())

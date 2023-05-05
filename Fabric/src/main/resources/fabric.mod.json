@@ -1,0 +1,27 @@
+{
+    "schemaVersion": 1,
+    "id": "tempban",
+    "version": "${version}",
+
+    "name": "Tempban",
+    "description": "A mod that adds a command to temporarily ban players.",
+    "authors": [
+      "Redstone_Dubstep"
+    ],
+
+    "license": "Default",
+
+    "environment": "*",
+    "entrypoints": {
+      "main": [
+          "redstonedubstep.mods.tempban.TempbanFabric"
+      ]
+    },
+
+    "depends": {
+      "fabricloader": ">=0.14",
+      "fabric": "*",
+      "minecraft": "1.19.4",
+      "java": ">=17"
+    }
+  }
