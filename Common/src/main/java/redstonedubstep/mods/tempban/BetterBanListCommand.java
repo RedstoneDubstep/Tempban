@@ -33,9 +33,9 @@ public class BetterBanListCommand {
 
 	private static int showList(CommandSourceStack source, Collection<? extends BanListEntry<?>> banListEntries) {
 		if (banListEntries.isEmpty())
-			source.sendSuccess(Component.translatable("commands.banlist.none"), false);
+			source.sendSuccess(() -> Component.translatable("commands.banlist.none"), false);
 		else {
-			source.sendSuccess(Component.translatable("commands.banlist.list", banListEntries.size()), false);
+			source.sendSuccess(() -> Component.translatable("commands.banlist.list", banListEntries.size()), false);
 
 			for(BanListEntry<?> entry : banListEntries) {
 				MutableComponent entryComponent = Component.translatable("commands.banlist.entry", entry.getDisplayName(), entry.getSource(), entry.getReason());
@@ -44,7 +44,7 @@ public class BetterBanListCommand {
 					entryComponent.append(Component.literal(" (" + entry.getCreated() + " - " + entry.getExpires() + ")").withStyle(ChatFormatting.GRAY));
 				}
 
-				source.sendSuccess(entryComponent, false);
+				source.sendSuccess(() -> entryComponent, false);
 			}
 		}
 

@@ -65,10 +65,10 @@ public class TempbanIpCommand {
 			IpBanListEntry ipbanentry = new IpBanListEntry(ip,null, source.getTextName(), date, reason == null ? null : reason.getString());
 
 			ipbanlist.add(ipbanentry);
-			source.sendSuccess(Component.translatable("Banned %s for %s months, %s days and %s hours: %s", ip, monthDuration, dayDuration, hourDuration, ipbanentry.getReason()), true);
+			source.sendSuccess(() -> Component.translatable("Banned %s for %s months, %s days and %s hours: %s", ip, monthDuration, dayDuration, hourDuration, ipbanentry.getReason()), true);
 
 			if (!list.isEmpty())
-				source.sendSuccess(Component.translatable("commands.banip.info", list.size(), EntitySelector.joinNames(list)), true);
+				source.sendSuccess(() -> Component.translatable("commands.banip.info", list.size(), EntitySelector.joinNames(list)), true);
 
 			for(ServerPlayer player : list) {
 				player.connection.disconnect(Component.translatable("multiplayer.disconnect.ip_banned"));

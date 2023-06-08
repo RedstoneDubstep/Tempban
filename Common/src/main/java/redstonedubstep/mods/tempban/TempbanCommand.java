@@ -51,7 +51,7 @@ public class TempbanCommand {
 
 				banList.add(banListEntry);
 				++i;
-				source.sendSuccess(Component.translatable("Banned %s for %s months, %s days and %s hours: %s", ComponentUtils.getDisplayName(gameprofile), monthDuration, dayDuration, hourDuration, banListEntry.getReason()), true);
+				source.sendSuccess(() -> Component.translatable("Banned %s for %s months, %s days and %s hours: %s", ComponentUtils.getDisplayName(gameprofile), monthDuration, dayDuration, hourDuration, banListEntry.getReason()), true);
 
 				ServerPlayer player = source.getServer().getPlayerList().getPlayer(gameprofile.getId());
 
