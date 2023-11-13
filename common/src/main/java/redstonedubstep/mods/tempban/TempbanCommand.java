@@ -17,7 +17,6 @@ import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.GameProfileArgument;
 import net.minecraft.commands.arguments.MessageArgument;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.UserBanList;
 import net.minecraft.server.players.UserBanListEntry;
@@ -51,7 +50,7 @@ public class TempbanCommand {
 
 				banList.add(banListEntry);
 				++i;
-				source.sendSuccess(() -> Component.translatable("Banned %s for %s months, %s days and %s hours: %s", ComponentUtils.getDisplayName(gameprofile), monthDuration, dayDuration, hourDuration, banListEntry.getReason()), true);
+				source.sendSuccess(() -> Component.translatable("Banned %s for %s months, %s days and %s hours: %s", Component.literal(gameprofile.getName()), monthDuration, dayDuration, hourDuration, banListEntry.getReason()), true);
 
 				ServerPlayer player = source.getServer().getPlayerList().getPlayer(gameprofile.getId());
 

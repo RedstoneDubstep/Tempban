@@ -4,10 +4,13 @@ out
 *.iws
 *.iml
 .idea/*
+!.idea/scopes
 
 # gradle
 build
 .gradle
 
 # other
+eclipse
 run
+runs
