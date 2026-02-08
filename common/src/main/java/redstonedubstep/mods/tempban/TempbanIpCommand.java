@@ -27,7 +27,7 @@ public class TempbanIpCommand {
 	private static final SimpleCommandExceptionType FAILED_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("commands.banip.failed"));
 
 	public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
-		dispatcher.register(Commands.literal("tempban-ip").requires(p -> p.hasPermission(3))
+		dispatcher.register(Commands.literal("tempban-ip").requires(Commands.hasPermission(Commands.LEVEL_ADMINS))
 				.then(Commands.argument("target", StringArgumentType.word())
 						.then(Commands.argument("months", IntegerArgumentType.integer(0))
 								.then(Commands.argument("days", IntegerArgumentType.integer(0))

@@ -23,11 +23,9 @@ neoForge {
         client {
             client()
         }
-        data {
-            clientData()
-        }
         server {
             server()
+            programArgument('-nogui')
         }
     }
     mods {

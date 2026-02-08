@@ -25,7 +25,7 @@ public class TempbanCommand {
 	private static final SimpleCommandExceptionType ERROR_ALREADY_BANNED = new SimpleCommandExceptionType(Component.translatable("commands.ban.failed"));
 
 	public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
-		dispatcher.register(Commands.literal("tempban").requires((player) -> player.hasPermission(3))
+		dispatcher.register(Commands.literal("tempban").requires(Commands.hasPermission(Commands.LEVEL_ADMINS))
 				.then(Commands.argument("targets", GameProfileArgument.gameProfile())
 						.then(Commands.argument("months", IntegerArgumentType.integer(0))
 								.then(Commands.argument("days", IntegerArgumentType.integer(0))

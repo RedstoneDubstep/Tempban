@@ -17,7 +17,7 @@ import net.minecraft.server.players.PlayerList;
 public class BetterBanListCommand {
 	public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
 		dispatcher.register(Commands.literal("banlist")
-				.requires(stack -> stack.hasPermission(3))
+				.requires(Commands.hasPermission(Commands.LEVEL_ADMINS))
 				.executes(ctx -> showConcatList(ctx.getSource()))
                 .then(Commands.literal("ips")
 						.executes(ctx -> showList(ctx.getSource(), ctx.getSource().getServer().getPlayerList().getIpBans().getEntries())))
